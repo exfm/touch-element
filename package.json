@@ -1,0 +1,24 @@
+{
+  "author": "Dan Kantor <dan@ex.fm>",
+  "name": "touch-element",
+  "description": "",
+  "version": "0.0.0",
+  "homepage": "http://github.com/exfm/touch-element",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/exfm/touch-element.git"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt-mocha": "0.1.3",
+    "mocha": "1.4.1",
+    "chai": "1.2.0"
+  },
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
