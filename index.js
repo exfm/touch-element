@@ -1,5 +1,6 @@
 (function(){
-    "use strict";
+    
+"use strict";
 
 // constructor
 function TouchElement(el, opts){
@@ -53,7 +54,7 @@ function TouchElement(el, opts){
 
 // add touch listeners to the element
 // if it is not a touch device, add 'click' listener
-TouchListItem.prototype.addListeners(){
+TouchElement.prototype.addListeners = function(){
     if(TouchElement.isTouchDevice){
         this.el.addEventListener(
             'touchstart', 
@@ -77,6 +78,7 @@ TouchListItem.prototype.addListeners(){
             this.clickListener.bind(this), 
             false
         );
+    }
 }
 
 // add touchStartClass to element. 
@@ -184,4 +186,4 @@ else{
     window.TouchElement = TouchElement;
 }
 
-}());
+}()); // end wrapper
