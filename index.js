@@ -16,39 +16,35 @@ function TouchElement(el, opts){
     else{
         throw new TypeError("You must provide an element");
     }
-
+    
     // should we add rgba(0,0,0,0) to webkitTapHighlightColor style on 
     // element to remove the tap highlight?
-    this.removeTapHighlight = opts.removeTapHighlight || true;
-    if(this.removeTapHighlight){
-        this.el.style.webkitTapHighlightColor = "rgba(0,0,0,0)";
-    };
-
+    this.removeTapHighlight = true;
+    
     // should we add 'none' to webkitTouchCallout style on element
     // to remove touchCallout?
-    this.removeTouchCallout = opts.removeTouchCallout || true;
-    if(this.removeTouchCallout){
-        this.el.style.webkitTouchCallout = "none";
-    };
-
+    this.removeTouchCallout = true;
+    
     // should we add 'none' to webkitUserSelect style on element
     // to remove userSelect?
-    this.removeUserSelect = opts.removeUserSelect || true;
-    if (this.removeUserSelect) {
-        this.el.style.webkitUserSelect = "none";
-    };
+    this.removeUserSelect = true;
     
-   // horizontal target area around element 
-   this.xRange = opts.xRange || 70;
+    // horizontal target area around element 
+    this.xRange = opts && opts.xRange || 70;
    
-   // vertical target area around element
-   this.yRange = opts.yRange || 70;
+    // vertical target area around element
+    this.yRange = opts && opts.yRange || 70;
+    
+    // extend all options passed in to this
+    $.extend(this, opts);
+    
+    // boolean if the element has touchStart class 
+    this.hasTouchStartClass = false;
    
-   // boolean if the element has touchStart class 
-   this.hasTouchStartClass = false;
-   
-   // keep track of the element's dimensions
-   this.elDimensions = {};
+    // keep track of the element's dimensions
+    this.elDimensions = {};
+    
+    this.addStyleOptions();
     
 }
 
@@ -79,6 +75,19 @@ TouchElement.prototype.addListeners = function(){
             false
         );
     }
+}
+
+// Add styles based on instance options
+TouchElement.prototype.addStyleOptions = function(){
+    if(this.removeTapHighlight){
+        this.el.style.webkitTapHighlightColor = "rgba(0,0,0,0)";
+    };
+    if(this.removeTouchCallout){
+        this.el.style.webkitTouchCallout = "none";
+    };
+    if (this.removeUserSelect) {
+        this.el.style.webkitUserSelect = "none";
+    };
 }
 
 // add touchStartClass to element. 
