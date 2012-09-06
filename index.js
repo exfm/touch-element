@@ -7,10 +7,11 @@ function TouchElement(el, opts){
     
     // Is this a touch device? Or just mouse clicks?
     this.isTouchDevice = 'ontouchstart' in document.documentElement;
-    
+        
     // the element we are attaching to. Required.
     if(el){
         this.el = el;
+        this.removeListeners();
         this.addListeners();
     }
     else{
@@ -35,6 +36,9 @@ function TouchElement(el, opts){
     // vertical target area around element
     this.yRange = opts && opts.yRange || 70;
     
+    // the class we will add to element on touchstart
+    this.touchStartClass = 'touchstart';
+    
     // extend all options passed in to this
     $.extend(this, opts);
     
@@ -51,42 +55,71 @@ function TouchElement(el, opts){
 // add touch listeners to the element
 // if it is not a touch device, add 'click' listener
 TouchElement.prototype.addListeners = function(){
-    if(TouchElement.isTouchDevice){
+    if(this.isTouchDevice){
+        this.bindedTouchStartListener = this.touchStartListener.bind(this);
+        this.bindedTouchEndListener = this.touchEndListener.bind(this);
+        this.bindedTouchMoveListener = this.touchMoveListener.bind(this);
         this.el.addEventListener(
             'touchstart', 
-            this.touchStartListener.bind(this), 
+            this.bindedTouchStartListener, 
             true
         );
         this.el.addEventListener(
             'touchend', 
-            this.touchEndListener.bind(this), 
+            this.bindedTouchEndListener, 
             true
         );
         this.el.addEventListener(
             'touchmove', 
-            this.touchMoveListener.bind(this), 
+            this.bindedTouchMoveListener, 
             true
         );
     }
     else{
+        this.bindedClickListener = this.clickListener.bind(this);
         this.el.addEventListener(
             'click', 
-            this.clickListener.bind(this), 
+            this.bindedClickListener, 
             false
         );
     }
 }
 
+// remove touch and click listeners to the element
+// if it is not a touch device, add 'click' listener
+TouchElement.prototype.removeListeners = function(){
+    this.el.removeEventListener(
+        'touchstart', 
+        this.bindedTouchStartListener, 
+        true
+    );
+    this.el.removeEventListener(
+        'touchend', 
+        this.bindedTouchEndListener, 
+        true
+    );
+    this.el.removeEventListener(
+        'touchmove', 
+        this.bindedTouchMoveListener, 
+        true
+    );
+    this.el.removeEventListener(
+        'click', 
+        this.bindedClickListener, 
+        false
+    );
+}
+
 // Add styles based on instance options
 TouchElement.prototype.addStyleOptions = function(){
     if(this.removeTapHighlight){
-        this.el.style.webkitTapHighlightColor = "rgba(0,0,0,0)";
+        $(this.el).css('webkitTapHighlightColor', 'rgba(0,0,0,0)');
     };
     if(this.removeTouchCallout){
-        this.el.style.webkitTouchCallout = "none";
+        $(this.el).css('webkitTouchCallout', 'none');
     };
     if (this.removeUserSelect) {
-        this.el.style.webkitUserSelect = "none";
+        $(this.el).css('webkitUserSelect', 'none');
     };
 }
 
@@ -108,7 +141,7 @@ TouchElement.prototype.removeTouchStartClass = function(e){
     if (this.hasTouchStartClass == true){
         $(this.el).removeClass(this.touchStartClass);
         if(this.touchEndClass){
-            $(this.el).addClass(this.touchEndClass)
+            $(this.el).addClass(this.touchEndClass);
         }
         this.hasTouchStartClass = false;
     }
