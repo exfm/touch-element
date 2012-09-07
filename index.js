@@ -49,7 +49,6 @@ function TouchElement(el, opts){
     this.elDimensions = {};
     
     this.addStyleOptions();
-    
 }
 
 // add touch listeners to the element
@@ -62,17 +61,17 @@ TouchElement.prototype.addListeners = function(){
         this.el.addEventListener(
             'touchstart', 
             this.bindedTouchStartListener, 
-            true
+            false
         );
         this.el.addEventListener(
             'touchend', 
             this.bindedTouchEndListener, 
-            true
+            false
         );
         this.el.addEventListener(
             'touchmove', 
             this.bindedTouchMoveListener, 
-            true
+            false
         );
     }
     else{
@@ -90,23 +89,19 @@ TouchElement.prototype.addListeners = function(){
 TouchElement.prototype.removeListeners = function(){
     this.el.removeEventListener(
         'touchstart', 
-        this.bindedTouchStartListener, 
-        true
+        this.bindedTouchStartListener
     );
     this.el.removeEventListener(
         'touchend', 
-        this.bindedTouchEndListener, 
-        true
+        this.bindedTouchEndListener
     );
     this.el.removeEventListener(
         'touchmove', 
-        this.bindedTouchMoveListener, 
-        true
+        this.bindedTouchMoveListener
     );
     this.el.removeEventListener(
         'click', 
-        this.bindedClickListener, 
-        false
+        this.bindedClickListener
     );
 }
 
@@ -165,22 +160,14 @@ TouchElement.prototype.touchStartListener = function(e){
 // trigger a 'touched' event on the element
 TouchElement.prototype.touchEndListener = function(e){
     if($(this.el).hasClass(this.touchStartClass)){
-        $(this.el).trigger(
-            {
-                'type': 'touched'
-            }
-        );
+        $(this.el).trigger('touched');
     }
     this.removeTouchStartClass(e);
 }
 
 // for non-touch devices. Trigger a 'touched' event on click.
 TouchElement.prototype.clickListener = function(e){
-    $(this.el).trigger(
-        {
-            'type': 'touched'
-        }
-    );
+    $(this.el).trigger('touched');
 }
 
 // listen for 'touchmove' event. If we are within bounds
