@@ -160,14 +160,24 @@ TouchElement.prototype.touchStartListener = function(e){
 // trigger a 'touched' event on the element
 TouchElement.prototype.touchEndListener = function(e){
     if($(this.el).hasClass(this.touchStartClass)){
-        $(this.el).trigger('touched');
+        $(this.el).trigger(
+            'touched',
+            {
+                'touchedElement': e.target
+            }
+        );
     }
     this.removeTouchStartClass(e);
 }
 
 // for non-touch devices. Trigger a 'touched' event on click.
 TouchElement.prototype.clickListener = function(e){
-    $(this.el).trigger('touched');
+    $(this.el).trigger(
+        'touched',
+        {
+            'touchedElement': e.target
+        }
+    );
 }
 
 // listen for 'touchmove' event. If we are within bounds
