@@ -146,7 +146,6 @@ TouchElement.prototype.removeTouchStartClass = function(e){
 // addTouchStartClass
 // get the position and dimensions of the element
 TouchElement.prototype.touchStartListener = function(e){
-    e.preventDefault();
     this.addTouchStartClass(e);
     var position = webkitConvertPointFromNodeToPage(e.target, new WebKitPoint(0, 0));
     this.elDimensions.startX = position.x;
@@ -184,7 +183,6 @@ TouchElement.prototype.clickListener = function(e){
 // set by xRange and yRange, add touchStart class. If not,
 // remove touchStart class.
 TouchElement.prototype.touchMoveListener = function(e){
-    e.preventDefault();
     if(!this.testBounds(e.targetTouches[0])){
         this.removeTouchStartClass(e);
     } 
