@@ -125,13 +125,13 @@ TouchElement.prototype.addStyleOptions = function(){
 // remove touchEndClass
 TouchElement.prototype.addTouchStartClass = function(e){
     if (this.hasTouchStartClass == false){
-        webkitRequestAnimationFrame($.proxy(function(){
+        this.requestAnimationFrame(function(){
             if(this.touchEndClass){
                 $(this.el).removeClass(this.touchEndClass);
             }
             $(this.el).addClass(this.touchStartClass);
             this.hasTouchStartClass = true;    
-        } , this));
+        });
     }
 }
 
@@ -139,13 +139,13 @@ TouchElement.prototype.addTouchStartClass = function(e){
 // remove touchStartClass
 TouchElement.prototype.removeTouchStartClass = function(e){
     if (this.hasTouchStartClass == true){
-        webkitRequestAnimationFrame($.proxy(function(){
+        this.requestAnimationFrame(function(){
             $(this.el).removeClass(this.touchStartClass);
             if(this.touchEndClass){
                 $(this.el).addClass(this.touchEndClass);
             }
             this.hasTouchStartClass = false;
-        } , this));
+        });
     }
 }
 
@@ -226,6 +226,19 @@ TouchElement.prototype.testBounds = function(target){
     }
     return true;
 }
+
+TouchElement.prototype.requestAnimationFrame = function(func){
+    var rAF = window.requestAnimationFrame || 
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame;
+    if(rAF){
+        rAF($.proxy(func, this));
+    }
+    else{
+        func.call(this);
+    }
+}
+
 
 
 // check if we've got require
