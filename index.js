@@ -39,6 +39,9 @@ function TouchElement(el, opts){
     // the class we will add to element on touchstart
     this.touchStartClass = 'touchstart';
     
+    // prevent default on event
+    this.preventDefault = false;
+    
     // extend all options passed in to this
     $.extend(this, opts);
     
@@ -122,11 +125,13 @@ TouchElement.prototype.addStyleOptions = function(){
 // remove touchEndClass
 TouchElement.prototype.addTouchStartClass = function(e){
     if (this.hasTouchStartClass == false){
-        if(this.touchEndClass){
-            $(this.el).removeClass(this.touchEndClass);
-        }
-        $(this.el).addClass(this.touchStartClass);
-        this.hasTouchStartClass = true;
+        webkitRequestAnimationFrame($.proxy(function(){
+            if(this.touchEndClass){
+                $(this.el).removeClass(this.touchEndClass);
+            }
+            $(this.el).addClass(this.touchStartClass);
+            this.hasTouchStartClass = true;    
+        } , this));
     }
 }
 
@@ -134,11 +139,13 @@ TouchElement.prototype.addTouchStartClass = function(e){
 // remove touchStartClass
 TouchElement.prototype.removeTouchStartClass = function(e){
     if (this.hasTouchStartClass == true){
-        $(this.el).removeClass(this.touchStartClass);
-        if(this.touchEndClass){
-            $(this.el).addClass(this.touchEndClass);
-        }
-        this.hasTouchStartClass = false;
+        webkitRequestAnimationFrame($.proxy(function(){
+            $(this.el).removeClass(this.touchStartClass);
+            if(this.touchEndClass){
+                $(this.el).addClass(this.touchEndClass);
+            }
+            this.hasTouchStartClass = false;
+        } , this));
     }
 }
 
@@ -146,6 +153,9 @@ TouchElement.prototype.removeTouchStartClass = function(e){
 // addTouchStartClass
 // get the position and dimensions of the element
 TouchElement.prototype.touchStartListener = function(e){
+    if(this.preventDefault === true){
+        e.preventDefault();
+    };
     this.addTouchStartClass(e);
     var position = webkitConvertPointFromNodeToPage(e.target, new WebKitPoint(0, 0));
     this.elDimensions.startX = position.x;
@@ -158,6 +168,9 @@ TouchElement.prototype.touchStartListener = function(e){
 // removeTouchStartClass
 // trigger a 'touched' event on the element
 TouchElement.prototype.touchEndListener = function(e){
+    if(this.preventDefault === true){
+        e.preventDefault();
+    };
     if($(this.el).hasClass(this.touchStartClass)){
         $(this.el).trigger(
             'touched',
