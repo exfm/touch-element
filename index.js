@@ -156,6 +156,7 @@ TouchElement.prototype.touchStartListener = function(e){
     if(this.preventDefault === true){
         e.preventDefault();
     };
+    this.shouldTrigger = true;
     this.addTouchStartClass(e);
     var position = webkitConvertPointFromNodeToPage(e.target, new WebKitPoint(0, 0));
     this.elDimensions.startX = position.x;
@@ -171,7 +172,7 @@ TouchElement.prototype.touchEndListener = function(e){
     if(this.preventDefault === true){
         e.preventDefault();
     };
-    if($(this.el).hasClass(this.touchStartClass)){
+    if(this.shouldTrigger === true){
         $(this.el).trigger(
             'touched',
             {
@@ -197,9 +198,11 @@ TouchElement.prototype.clickListener = function(e){
 // remove touchStart class.
 TouchElement.prototype.touchMoveListener = function(e){
     if(!this.testBounds(e.targetTouches[0])){
+        this.shouldTrigger = false;
         this.removeTouchStartClass(e);
     } 
     else {
+        this.shouldTrigger = true;
         this.addTouchStartClass(e);
     };
 }
