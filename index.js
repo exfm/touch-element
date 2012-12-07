@@ -42,6 +42,9 @@ function TouchElement(el, opts){
     // prevent default on event
     this.preventDefault = false;
     
+    // element to add/remove class from
+    this.touchClassElement = this.el;
+    
     // extend all options passed in to this
     $.extend(this, opts);
     
@@ -127,9 +130,9 @@ TouchElement.prototype.addTouchStartClass = function(e){
     if (this.hasTouchStartClass == false){
         this.requestAnimationFrame(function(){
             if(this.touchEndClass){
-                $(this.el).removeClass(this.touchEndClass);
+                $(this.touchClassElement).removeClass(this.touchEndClass);
             }
-            $(this.el).addClass(this.touchStartClass);
+            $(this.touchClassElement).addClass(this.touchStartClass);
             this.hasTouchStartClass = true;    
         });
     }
@@ -140,9 +143,9 @@ TouchElement.prototype.addTouchStartClass = function(e){
 TouchElement.prototype.removeTouchStartClass = function(e){
     if (this.hasTouchStartClass == true){
         this.requestAnimationFrame(function(){
-            $(this.el).removeClass(this.touchStartClass);
+            $(this.touchClassElement).removeClass(this.touchStartClass);
             if(this.touchEndClass){
-                $(this.el).addClass(this.touchEndClass);
+                $(this.touchClassElement).addClass(this.touchEndClass);
             }
             this.hasTouchStartClass = false;
         });
