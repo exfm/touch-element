@@ -172,6 +172,7 @@ TouchElement.prototype.touchStartListener = function(e){
 // removeTouchStartClass
 // trigger a 'touched' event on the element
 TouchElement.prototype.touchEndListener = function(e){
+    this.removeTouchStartClass(e);
     if(this.preventDefault === true){
         e.preventDefault();
     };
@@ -183,7 +184,6 @@ TouchElement.prototype.touchEndListener = function(e){
             }
         );
     }
-    this.removeTouchStartClass(e);
 }
 
 // for non-touch devices. Trigger a 'touched' event on click.
