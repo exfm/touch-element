@@ -128,13 +128,13 @@ TouchElement.prototype.addStyleOptions = function(){
 // remove touchEndClass
 TouchElement.prototype.addTouchStartClass = function(e){
     if (this.hasTouchStartClass == false){
-        this.requestAnimationFrame(function(){
+        //this.requestAnimationFrame(function(){
             if(this.touchEndClass){
                 $(this.touchClassElement).removeClass(this.touchEndClass);
             }
             $(this.touchClassElement).addClass(this.touchStartClass);
             this.hasTouchStartClass = true;    
-        });
+        //});
     }
 }
 
@@ -142,13 +142,13 @@ TouchElement.prototype.addTouchStartClass = function(e){
 // remove touchStartClass
 TouchElement.prototype.removeTouchStartClass = function(e){
     if (this.hasTouchStartClass == true){
-        this.requestAnimationFrame(function(){
+        //this.requestAnimationFrame(function(){
             $(this.touchClassElement).removeClass(this.touchStartClass);
             if(this.touchEndClass){
                 $(this.touchClassElement).addClass(this.touchEndClass);
             }
             this.hasTouchStartClass = false;
-        });
+        //});
     }
 }
 
