@@ -7,6 +7,10 @@ function TouchElement(el, opts){
     
     // Is this a touch device? Or just mouse clicks?
     this.isTouchDevice = 'ontouchstart' in document.documentElement;
+    
+    if(navigator.appVersion.indexOf('CrOS') != -1){
+        this.isTouchDevice = false;
+    }
         
     // the element we are attaching to. Required.
     if(el){
