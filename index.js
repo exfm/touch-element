@@ -1,158 +1,112 @@
-(function(){
-    
+(function ($){
+
 "use strict";
 
-// constructor
+$.fn.touchElement = function(options) {
+    var opts = $.extend( {}, $.fn.touchElement.defaults, options);
+    return this.each(function() {
+        new TouchElement(this, opts);
+    });
+};
+
+$.fn.touchElement.defaults = {
+    'isTouchDevice': 'ontouchstart' in document.documentElement,
+    'touched': function() {},
+    'removeTapHighlight': true,
+    'removeTouchCallout': true,
+    'removeUserSelect': true,
+    'xRange': 70,
+    'yRange': 70,
+    'touchStartClass': 'touchstart',
+    'touchClassElement': null,
+    'shouldPreventDefault': false,
+    'shouldStopPropagation': false,
+    'triggerTimeoutDelay': 300
+};
+
 function TouchElement(el, opts){
-    
-    // Is this a touch device? Or just mouse clicks?
-    this.isTouchDevice = 'ontouchstart' in document.documentElement;
-    
-    if(navigator.appVersion.indexOf('CrOS') != -1){
-        this.isTouchDevice = false;
-    }
-        
-    // the element we are attaching to. Required.
-    if(el){
-        this.el = el;
-        this.removeListeners();
-        this.addListeners();
-    }
-    else{
-        throw new TypeError("You must provide an element");
-    }
-    
-    // should we add rgba(0,0,0,0) to webkitTapHighlightColor style on 
-    // element to remove the tap highlight?
-    this.removeTapHighlight = true;
-    
-    // should we add 'none' to webkitTouchCallout style on element
-    // to remove touchCallout?
-    this.removeTouchCallout = true;
-    
-    // should we add 'none' to webkitUserSelect style on element
-    // to remove userSelect?
-    this.removeUserSelect = true;
-    
-    // horizontal target area around element 
-    this.xRange = opts && opts.xRange || 70;
-   
-    // vertical target area around element
-    this.yRange = opts && opts.yRange || 70;
-    
-    // the class we will add to element on touchstart
-    this.touchStartClass = 'touchstart';
-    
-    // prevent default on event
-    this.preventDefault = false;
-    
-    // element to add/remove class from
-    this.touchClassElement = this.el;
-    
-    // extend all options passed in to this
-    $.extend(this, opts);
-    
-    // boolean if the element has touchStart class 
+    this.el = $(el);
+    this.opts = opts;
+    this.removeListeners();
+    this.addListeners();
+
+    // boolean if the element has touchStart class
     this.hasTouchStartClass = false;
-   
+
     // keep track of the element's dimensions
     this.elDimensions = {};
-    
+
+    this.touchClassElement = $(this.el);
+    if(this.opts.touchClassElement !== null){
+        this.touchClassElement = $(this.opts.touchClassElement);
+    }
     this.addStyleOptions();
+    
+    this.justTriggered = false;
+
+    return this;
 }
 
 // add touch listeners to the element
 // if it is not a touch device, add 'click' listener
 TouchElement.prototype.addListeners = function(){
-    if(this.isTouchDevice){
-        this.bindedTouchStartListener = this.touchStartListener.bind(this);
-        this.bindedTouchEndListener = this.touchEndListener.bind(this);
-        this.bindedTouchMoveListener = this.touchMoveListener.bind(this);
-        this.el.addEventListener(
-            'touchstart', 
-            this.bindedTouchStartListener, 
-            false
-        );
-        this.el.addEventListener(
-            'touchend', 
-            this.bindedTouchEndListener, 
-            false
-        );
-        this.el.addEventListener(
-            'touchmove', 
-            this.bindedTouchMoveListener, 
-            false
-        );
+    if(this.opts.isTouchDevice){
+        this.bindedTouchStartListener = $.proxy(this.touchStartListener, this);
+        this.bindedTouchEndListener = $.proxy(this.touchEndListener, this);
+        this.bindedTouchMoveListener = $.proxy(this.touchMoveListener, this);
+        this.el.on('touchstart', this.bindedTouchStartListener);
+        this.el.on('touchend', this.bindedTouchEndListener);
+        this.el.on('touchmove', this.bindedTouchMoveListener);
     }
     else{
-        this.bindedClickListener = this.clickListener.bind(this);
-        this.el.addEventListener(
-            'click', 
-            this.bindedClickListener, 
-            false
-        );
+        this.bindedClickListener = $.proxy(this.trigger, this);
+        this.el.on('click', this.bindedClickListener);
     }
 }
 
 // remove touch and click listeners to the element
 // if it is not a touch device, add 'click' listener
 TouchElement.prototype.removeListeners = function(){
-    this.el.removeEventListener(
-        'touchstart', 
-        this.bindedTouchStartListener
-    );
-    this.el.removeEventListener(
-        'touchend', 
-        this.bindedTouchEndListener
-    );
-    this.el.removeEventListener(
-        'touchmove', 
-        this.bindedTouchMoveListener
-    );
-    this.el.removeEventListener(
-        'click', 
-        this.bindedClickListener
-    );
+    this.el.off('touchstart', this.bindedTouchStartListener);
+    this.el.off('touchend', this.bindedTouchEndListener);
+    this.el.off('touchmove', this.bindedTouchMoveListener);
+    this.el.off('click', this.bindedClickListener);
 }
 
 // Add styles based on instance options
 TouchElement.prototype.addStyleOptions = function(){
-    if(this.removeTapHighlight){
-        $(this.el).css('webkitTapHighlightColor', 'rgba(0,0,0,0)');
+    if(this.opts.removeTapHighlight === true){
+        this.el.css('webkitTapHighlightColor', 'rgba(0,0,0,0)');
     };
-    if(this.removeTouchCallout){
-        $(this.el).css('webkitTouchCallout', 'none');
+    if(this.opts.removeTouchCallout === true){
+        this.el.css('webkitTouchCallout', 'none');
     };
-    if (this.removeUserSelect) {
-        $(this.el).css('webkitUserSelect', 'none');
+    if(this.opts.removeUserSelect === true) {
+        this.el.css('webkitUserSelect', 'none');
     };
 }
 
-// add touchStartClass to element. 
+// add touchStartClass to element.
 // remove touchEndClass
 TouchElement.prototype.addTouchStartClass = function(e){
-    if (this.hasTouchStartClass == false){
-        //this.requestAnimationFrame(function(){
-            if(this.touchEndClass){
-                $(this.touchClassElement).removeClass(this.touchEndClass);
-            }
-            $(this.touchClassElement).addClass(this.touchStartClass);
-            this.hasTouchStartClass = true;    
-        //});
+    if(this.hasTouchStartClass === false){
+        if(this.opts.touchEndClass){
+            this.touchClassElement.removeClass(this.opts.touchEndClass);
+        }
+        this.touchClassElement.addClass(this.opts.touchStartClass);
+        this.hasTouchStartClass = true;
     }
 }
 
 // add touchEndClass to element
 // remove touchStartClass
 TouchElement.prototype.removeTouchStartClass = function(e){
-    if (this.hasTouchStartClass == true){
-        //this.requestAnimationFrame(function(){
-            $(this.touchClassElement).removeClass(this.touchStartClass);
-            if(this.touchEndClass){
-                $(this.touchClassElement).addClass(this.touchEndClass);
-            }
-            this.hasTouchStartClass = false;
-        //});
+    if (this.hasTouchStartClass === true){
+        this.touchClassElement.removeClass(this.opts.touchStartClass);
+        if(this.opts.touchEndClass){
+            this.touchClassElement.addClass(this.opts.touchEndClass);
+        }
+        this.hasTouchStartClass = false;
     }
 }
 
@@ -160,7 +114,7 @@ TouchElement.prototype.removeTouchStartClass = function(e){
 // addTouchStartClass
 // get the position and dimensions of the element
 TouchElement.prototype.touchStartListener = function(e){
-    if(this.preventDefault === true){
+    if(this.opts.shouldPreventDefault === true){
         e.preventDefault();
     };
     this.shouldTrigger = true;
@@ -170,34 +124,28 @@ TouchElement.prototype.touchStartListener = function(e){
     this.elDimensions.endX = position.x + e.target.offsetWidth;
     this.elDimensions.startY = position.y;
     this.elDimensions.endY = position.y + e.target.offsetHeight;
+    if(this.opts.shouldStopPropagation === true){
+        e.stopPropagation();
+        return false;
+    };
 }
+
 
 // listen for 'touchend' event.
 // removeTouchStartClass
 // trigger a 'touched' event on the element
 TouchElement.prototype.touchEndListener = function(e){
     this.removeTouchStartClass(e);
-    if(this.preventDefault === true){
+    if(this.opts.shouldPreventDefault === true){
         e.preventDefault();
     };
     if(this.shouldTrigger === true){
-        $(this.el).trigger(
-            'touched',
-            {
-                'touchedElement': e.target
-            }
-        );
+        this.trigger(e);
     }
-}
-
-// for non-touch devices. Trigger a 'touched' event on click.
-TouchElement.prototype.clickListener = function(e){
-    $(this.el).trigger(
-        'touched',
-        {
-            'touchedElement': e.target
-        }
-    );
+    if(this.opts.shouldStopPropagation === true){
+        e.stopPropagation();
+        return false;
+    };
 }
 
 // listen for 'touchmove' event. If we are within bounds
@@ -207,7 +155,7 @@ TouchElement.prototype.touchMoveListener = function(e){
     if(!this.testBounds(e.targetTouches[0])){
         this.shouldTrigger = false;
         this.removeTouchStartClass(e);
-    } 
+    }
     else {
         this.shouldTrigger = true;
         this.addTouchStartClass(e);
@@ -216,19 +164,19 @@ TouchElement.prototype.touchMoveListener = function(e){
 
 // test that the touch is within the bounds of xRange and yRange
 TouchElement.prototype.testBounds = function(target){
-    if(target.pageX < this.elDimensions.startX - this.xRange){
+    if(target.pageX < this.elDimensions.startX - this.opts.xRange){
         return false;
     }
-    if(target.pageX > this.elDimensions.endX + this.xRange){
+    if(target.pageX > this.elDimensions.endX + this.opts.xRange){
         return false;
     }
     if(target.pageX < 5){
         return false;
     }
-    if(target.pageY < this.elDimensions.startY - this.yRange){
+    if(target.pageY < this.elDimensions.startY - this.opts.yRange){
         return false;
     }
-    if(target.pageY > this.elDimensions.endY + this.yRange){
+    if(target.pageY > this.elDimensions.endY + this.opts.yRange){
         return false;
     }
     if(target.pageY < 0){
@@ -237,26 +185,22 @@ TouchElement.prototype.testBounds = function(target){
     return true;
 }
 
-TouchElement.prototype.requestAnimationFrame = function(func){
-    var rAF = window.requestAnimationFrame || 
-        window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame;
-    if(rAF){
-        rAF($.proxy(func, this));
+// trigger our custom 'touched' event
+TouchElement.prototype.trigger = function(e){
+    if(this.justTriggered === false){
+        this.opts.touched.call(this, e);
+        this.el.trigger($.extend($.Event('touched'), e));
+        this.justTriggered = true;
+        this.triggerTimeout = setTimeout(
+            function(){
+                this.justTriggered = false;
+            }.bind(this),
+            this.opts.triggerTimeoutDelay
+        );
     }
-    else{
-        func.call(this);
-    }
 }
 
 
+}($)); // end
 
-// check if we've got require
-if(typeof module !== "undefined"){
-    module.exports = TouchElement;
-}
-else{
-    window.TouchElement = TouchElement;
-}
 
-}()); // end wrapper
