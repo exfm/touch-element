@@ -21,6 +21,4 @@ drag your finger back on, it will register. For non-touch devices, it will fire 
 ## Usage
     
     var TouchElement = require('TouchElement'),
-        touchElement = new TouchElement(el);
-        
-    touchElement.addEventListener('touched', function(){...});
+    $('#el').touchElement().on('touched', this.onElTouch);
