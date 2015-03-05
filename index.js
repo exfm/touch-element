@@ -43,6 +43,7 @@ function TouchElement(el, opts){
     this.addStyleOptions();
     
     this.justTriggered = false;
+    
 
     return this;
 }
@@ -152,7 +153,7 @@ TouchElement.prototype.touchEndListener = function(e){
 // set by xRange and yRange, add touchStart class. If not,
 // remove touchStart class.
 TouchElement.prototype.touchMoveListener = function(e){
-    if(!this.testBounds(e.targetTouches[0])){
+    if(!this.testBounds(e.originalEvent.targetTouches[0])){
         this.shouldTrigger = false;
         this.removeTouchStartClass(e);
     }
@@ -189,7 +190,8 @@ TouchElement.prototype.testBounds = function(target){
 TouchElement.prototype.trigger = function(e){
     if(this.justTriggered === false){
         this.opts.touched.call(this, e);
-        this.el.trigger($.extend($.Event('touched'), e));
+        var newEvent = $.extend(e, $.Event('touched'));
+        this.el.trigger(newEvent);
         this.justTriggered = true;
         this.triggerTimeout = setTimeout(
             function(){
