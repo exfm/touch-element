@@ -120,11 +120,11 @@ TouchElement.prototype.touchStartListener = function(e){
     };
     this.shouldTrigger = true;
     this.addTouchStartClass(e);
-    var position = webkitConvertPointFromNodeToPage(e.target, new WebKitPoint(0, 0));
-    this.elDimensions.startX = position.x;
-    this.elDimensions.endX = position.x + e.target.offsetWidth;
-    this.elDimensions.startY = position.y;
-    this.elDimensions.endY = position.y + e.target.offsetHeight;
+    var position = e.target.getBoundingClientRect();
+    this.elDimensions.startX = position.left;
+    this.elDimensions.endX = position.left + e.target.offsetWidth;
+    this.elDimensions.startY = position.top;
+    this.elDimensions.endY = position.top + e.target.offsetHeight;
     if(this.opts.shouldStopPropagation === true){
         e.stopPropagation();
         return false;
